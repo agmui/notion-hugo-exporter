@@ -27,12 +27,13 @@ import {
 // Note that: Notion's Page modification date (as 'last_edited_time') is different
 //            from the last update date of Hugo's page ('lastmod')
 export const getPageFrontmatter = async (
-  pageId: string,
+  pageMeta: any, // pageId: string,
   options: frontmatterOptions,
   customProperties: string[][] | undefined
 ): Promise<frontMatter> => {
+  const pageId: string = pageMeta["id"];
   log(`[Info] [pageId: ${pageId}] Fetch from Notion API`);
-  const pageMeta = await getArticle(pageId);
+  // const pageMeta = await getArticle(pageId);
 
   //@ts-ignore
   if (pageMeta["archive"]) {
@@ -70,6 +71,7 @@ export const getPageFrontmatter = async (
     draft: pageDraft(properties),
   };
 
+  /*
   if (hasPlainText(properties["Url"])) {
     frontMatter["url"] = pageUrl(properties);
   } else if (hasPlainText(properties["Slug"])) {
@@ -79,6 +81,7 @@ export const getPageFrontmatter = async (
       `One of the "Url" and "Slug" page properties must be defined.`
     );
   }
+  */
 
   // Property for forcing the exported `.md` file name.
   if (pageFilepath(properties)) {

@@ -204,13 +204,14 @@ const fetchDataFromNotion = async (
   const skipMessages: string[] = [];
   const updatedMessages: string[] = [];
 
-  const convertAndWriteMarkdown = async (pageId: string): Promise<void> => {
+  const convertAndWriteMarkdown = async (pageMeta: any): Promise<void> => {
+    const pageId: string = pageMeta["id"];
     const options: frontmatterOptions = {
       author: config.authorName ? config.authorName : "Writer",
       utcOffset: config.utcOffset ? config.utcOffset : "",
     };
     const frontMatter = await getPageFrontmatter(
-      pageId,
+      pageMeta,
       options,
       config.customProperties
     );
@@ -259,12 +260,89 @@ const fetchDataFromNotion = async (
 
   const concurrency = config.concurrency ? config.concurrency : 5;
   const limit = pLimit(concurrency);
-  const results = await getPublishedArticles();
+  let results = await getPublishedArticles();
+
+  /*
+  getSubDir takes in the result array from `getPublishedArticles()`
+  and returns the same result array with filepath filled in and removed
+  pages and child pages that where `isPublished` is false.
+
+  getSubDir makes it so pages in notion stay in their respective
+  sub page directories. For parent pages they will turn into
+  a directory and and the body of the page will go into the 
+  _index.md.
+
+  Note: this messes with the filepath and will be used later down in buildFrontmatter.ts
+
+  Note: if a parent page has the `isPublished` set to false
+  then all pages under will be removed.
+  */
+  const getSubDir = (results: any[]): any[] => {
+    const id2name: any = {};
+    for (const p of results) {
+      const parent: string = p["parent"][Object.keys(p["parent"])[1]]; // this is hack
+      const id: string = p["id"];
+      const name: string = p["properties"]["Name"]["title"][0]["plain_text"];
+      if (parent in id2name) {
+        id2name[parent]["directory"] = true;
+      } else if (p["parent"]["type"] != "database_id") {
+        id2name[parent] = { name: null, parent_id: null, directory: true };
+      }
+      const directory: boolean =
+        id in id2name ? id2name[id]["directory"] : false;
+      id2name[id] = { name: name, parent_id: parent, directory: directory };
+    }
+
+    const cleaned_results = [];
+    for (const pageMeta of results) {
+      const filepath_obj = pageMeta["properties"]["filepath"]["rich_text"];
+      // if there already is rich text
+      if (filepath_obj.length > 0) {
+        console.log("-------", filepath_obj[0]["plain_text"]);
+        cleaned_results.push(pageMeta);
+        continue;
+      }
+      let filepath_str = "";
+      const pageId: string = pageMeta["id"];
+      let parent: string = id2name[pageId]["parent_id"];
+      while (parent in id2name) {
+        filepath_str = id2name[parent]["name"] + "/" + filepath_str;
+        parent = id2name[parent]["parent_id"];
+      }
+      // account for case when parent is not published
+      if (parent == null) {
+        continue;
+      }
+      if (id2name[pageId]["directory"] == false) {
+        filepath_str += id2name[pageId]["name"] + ".md";
+      } else {
+        filepath_str += id2name[pageId]["name"] + "/" + "_index.md"; // _index.md is in its own dir name
+      }
+      log(`[Info] creating file at: ${filepath_str}`);
+      filepath_obj[0] = {
+        type: "text",
+        text: { content: filepath_str, link: null },
+        annotations: {
+          bold: false,
+          italic: false,
+          strikethrough: false,
+          underline: false,
+          code: false,
+          color: "default",
+        },
+        plain_text: filepath_str,
+        href: null,
+      };
+      cleaned_results.push(pageMeta);
+    }
+    return cleaned_results;
+  };
+  results = getSubDir(results);
 
   const tasks: Promise<void>[] = [];
   for (const page of results) {
     if (argv.force || (await isRequiredPageUpdate(page))) {
-      tasks.push(limit(() => convertAndWriteMarkdown(page["id"])));
+      tasks.push(limit(() => convertAndWriteMarkdown(page)));
     } else {
       skipMessages.push(
         `Skip mesage: pageId: ${page["id"]}}: title: ${page["properties"]["Name"]["title"][0]["plain_text"]}}`
