@@ -252,8 +252,11 @@ const fetchDataFromNotion = async (
         `Create message: pageId: ${pageId}: title: ${frontMatter.title}`
       );
     }
-
-    const mdString = await fetchBodyFromNotion(config, frontMatter, argv);
+    const text: string =
+      pageMeta["properties"]["filepath"]["rich_text"][0]["plain_text"];
+    let mdString = "";
+    if (text.substring(text.length - 10) != "/_index.md")
+      mdString = await fetchBodyFromNotion(config, frontMatter, argv);
     log(`[Info] [pageId: ${pageId}] Writing...`);
     await writeContentFile(config, frontMatter, mdString);
   };
@@ -298,7 +301,7 @@ const fetchDataFromNotion = async (
       const filepath_obj = pageMeta["properties"]["filepath"]["rich_text"];
       // if there already is rich text
       if (filepath_obj.length > 0) {
-        console.log("-------", filepath_obj[0]["plain_text"]);
+        log(`[Info] creating file at: ${filepath_obj[0]["plain_text"]}`);
         cleaned_results.push(pageMeta);
         continue;
       }
