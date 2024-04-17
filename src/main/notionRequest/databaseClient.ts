@@ -24,12 +24,12 @@ export const getPublishedArticles = async (): Promise<any[]> => {
       await notion.databases.query({
         database_id: databaseId,
         start_cursor: cursor,
-        filter: {
-          property: "isPublished",
-          checkbox: {
-            equals: true,
-          },
-        },
+        // filter: { // commented out because directories may not be published but may need to be used
+        //   property: "isPublished",
+        //   checkbox: {
+        //     equals: true,
+        //   },
+        // },
         sorts: [
           {
             property: "Created",

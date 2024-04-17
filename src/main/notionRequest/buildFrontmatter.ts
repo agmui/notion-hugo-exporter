@@ -48,7 +48,7 @@ export const getPageFrontmatter = async (
 
   log(properties, LogTypes.debug);
 
-  const date = pagePublishedAt(properties);
+  const date = pageMeta["last_edited_time"]; //pagePublishedAt(properties);
   const dateWithZone = isOnlyDate(date)
     ? setTimeMidnight(date, options.utcOffset)
     : date;
