@@ -45,7 +45,8 @@ export const pageDraft = (prop: any): boolean => {
 export const pagePublishedAt = (prop: any): string => {
   return extractDateTime(prop["PublishedAt"]);
 };
-export const pageUpdatedAt = (prop: any): string => {
+export const pageUpdatedAt = (prop: any): string | null => {
+  if (prop["UpdatedAt"] === undefined) return null;
   return extractDateTime(prop["UpdatedAt"]);
 };
 export const pageTags = (prop: any): string[] => {
@@ -59,7 +60,8 @@ export const pageCategory = (prop: any): string[] => {
 
   return [category];
 };
-export const pageSection = (prop: any): string => {
+export const pageSection = (prop: any): string | null => {
+  if (prop["Section"] === undefined) return null;
   return extractPlainText(prop["Section"]);
 };
 
@@ -172,7 +174,7 @@ export const booleanProperty = (prop: any): boolean => {
   return false;
 };
 
-export const customPropery = (
+export const getCustomProperty = (
   prop: any,
   propertyKey: string,
   propertyType: string

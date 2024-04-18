@@ -241,6 +241,7 @@ const fetchDataFromNotion = async (
       return;
     }
 
+    //TODO: add remove pg feature
     if (lastCheckedCache) {
       await updatePage(frontMatter.sys);
       updatedMessages.push(

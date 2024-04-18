@@ -2,6 +2,8 @@
 
 > Note this is a fork of <https://github.com/dobassy/notion-hugo-exporter>. This repo is simply an implementation that preserves the filestructure in notion pages. This was mainly for [lotusdocs](https://lotusdocs.dev/) which needs sub directories. [Live result](https://agmui.github.io/rhit_docs.github.io/docs/)
 
+also directories will not have its body copied over
+
 Use "[Notion](https://www.notion.so/product)" as a Headless CMS to generate a content file for [Hugo](https://gohugo.io/).
 
 This software is dedicated to generating Markdown content for Hugo. After generating the content, follow the Hugo specifications.
@@ -135,17 +137,16 @@ Notion database property keys must be:
 | Property Name   | Type                 | Required                                 | Default value |
 | --------------- | -------------------- | ---------------------------------------- | ------------- |
 | isPublished     | Boolean              | ✅                                       |
-| Category        | Select               | ✅                                       |
-| Tags            | multi_select         | ✅                                       |
+| Tags            | multi_select         |                                        |
 | PublishedAt     | date                 | ✅                                       |
-| UpdatedAt       | date                 | ✅                                       |
+| UpdatedAt       | date                 |                                        |
 | ~~Url~~             | Text (removed for personal website)                 | ✅ (Either Url or Slug)                  |
 | ~~Slug~~            | Text (removed for personal website)                | ✅ (Either Url or Slug)                  |
 | ~~LegacyAlert~~ | Boolean              | (Removed mandatory constraint from v0.5) |
-| Description     | Text                 | ✅                                       |
-| Image           | Image (external url) | ✅                                       |
+| Description     | Text                 |                                        |
+| Image           | Image (external url) |                                        |
 | ~~ToC~~         | Boolean              | (Removed mandatory constraint from v0.5) |
-| Section         | Select               | ✅                                       |
+| Section         | Select               |                                        |
 | Author          | Text or Select       |                                          | "Writer"      |
 | isDraft         | Boolean              |                                          | false         |
 | filepath        | Text                 |                                          |               |

@@ -18,7 +18,7 @@ import {
   pageWeight,
   extractExternalUrl,
   hasPlainText,
-  customPropery,
+  getCustomProperty,
 } from "./property";
 
 // Store all metadata in frontMatter
@@ -32,7 +32,6 @@ export const getPageFrontmatter = async (
   customProperties: string[][] | undefined
 ): Promise<frontMatter> => {
   const pageId: string = pageMeta["id"];
-  log(`[Info] [pageId: ${pageId}] Fetch from Notion API`);
   // const pageMeta = await getArticle(pageId);
 
   //@ts-ignore
@@ -45,6 +44,11 @@ export const getPageFrontmatter = async (
   }
   //@ts-ignore
   const properties = pageMeta["properties"];
+  log(
+    `[Info] [name: ${pageTitle(
+      properties
+    )}, pageId: ${pageId}] Fetch from Notion API`
+  );
 
   log(properties, LogTypes.debug);
 
@@ -66,7 +70,7 @@ export const getPageFrontmatter = async (
     date: dateWithZone,
     description: pageDescription(properties),
     tags: pageTags(properties),
-    categories: pageCategory(properties),
+    // categories: pageCategory(properties),
     author: pageAuthor(properties, options),
     draft: pageDraft(properties),
   };
@@ -93,7 +97,7 @@ export const getPageFrontmatter = async (
   }
 
   if (pageUpdatedAt(properties)) {
-    const lastmod = pageUpdatedAt(properties);
+    const lastmod: any = pageUpdatedAt(properties);
     frontMatter["lastmod"] = isOnlyDate(lastmod)
       ? setTimeMidnight(lastmod, options.utcOffset)
       : lastmod;
@@ -119,7 +123,7 @@ export const getPageFrontmatter = async (
     for (const customProperty of customProperties) {
       const cProp = customProperty[0];
       const cType = customProperty[1];
-      frontMatter[cProp] = customPropery(properties, cProp, cType);
+      frontMatter[cProp] = getCustomProperty(properties, cProp, cType);
     }
   }
 
