@@ -264,7 +264,6 @@ const fetchDataFromNotion = async (
     )
       mdString = await fetchBodyFromNotion(config, frontMatter, argv);
     log(`[Info] [pageId: ${pageId}] Writing...`);
-    console.log(config)
     await writeContentFile(config, frontMatter, mdString);
   };
 
