@@ -10,7 +10,6 @@ import notion from "./notionRequest/client";
 import {
   ListBlockChildrenResponseResults,
   MdBlock,
-  MdStringObject,
 } from "notion-to-md/build/types";
 import pLimit from "p-limit";
 import { createPage, findByPageId, updatePage } from "./datastore";
@@ -265,6 +264,7 @@ const fetchDataFromNotion = async (
     )
       mdString = await fetchBodyFromNotion(config, frontMatter, argv);
     log(`[Info] [pageId: ${pageId}] Writing...`);
+    console.log(config)
     await writeContentFile(config, frontMatter, mdString);
   };
 
