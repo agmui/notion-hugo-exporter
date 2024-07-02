@@ -10,6 +10,7 @@ import notion from "./notionRequest/client";
 import {
   ListBlockChildrenResponseResults,
   MdBlock,
+  MdStringObject,
 } from "notion-to-md/build/types";
 import pLimit from "p-limit";
 import { createPage, findByPageId, updatePage } from "./datastore";
@@ -185,7 +186,7 @@ const fetchBodyFromNotion = async (
   }
   const mdblocks: MdBlock[] = await n2m.blocksToMarkdown(blocks);
 
-  const mdString = n2m.toMarkdownString(mdblocks);
+  const mdString: string = n2m.toMarkdownString(mdblocks).parent;
 
   const markdownText = await convertS3ImageUrl(mdString);
   if (config.s3ImageUrlWarningEnabled && includeAwsImageUrl(markdownText)) {
@@ -253,11 +254,15 @@ const fetchDataFromNotion = async (
         `Create message: pageId: ${pageId}: title: ${frontMatter.title}`
       );
     }
-    const text: string =
+    const file_path: string =
       pageMeta["properties"]["filepath"]["rich_text"][0]["plain_text"];
     let mdString = "";
     // directories will not have its body copied over
-    if (text.substring(text.length - 10) != "/_index.md")
+    const dir_file_name = "/_index.md";
+    if (
+      file_path.substring(file_path.length - dir_file_name.length) !=
+      dir_file_name
+    )
       mdString = await fetchBodyFromNotion(config, frontMatter, argv);
     log(`[Info] [pageId: ${pageId}] Writing...`);
     await writeContentFile(config, frontMatter, mdString);

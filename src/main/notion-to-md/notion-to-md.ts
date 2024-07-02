@@ -1,5 +1,5 @@
 import { NotionToMarkdown } from "notion-to-md";
-import { MdBlock } from "notion-to-md/build/types";
+import { MdBlock, MdStringObject } from "notion-to-md/build/types";
 import * as md from "notion-to-md/build/utils/md";
 
 // inherit a class
@@ -20,7 +20,11 @@ export class NotionToMarkdownCustom extends NotionToMarkdown {
    * @param {number} nestingLevel - Defines max depth of nesting
    * @returns {string} - Returns markdown string
    */
-  toMarkdownString(mdBlocks: MdBlock[] = [], nestingLevel = 0): string {
+  toMarkdownString(
+    mdBlocks: MdBlock[] = [],
+    pageIdentifier = "parent",
+    nestingLevel = 0
+  ): MdStringObject {
     let mdString = "";
 
     // Insert a blank line when List starts
@@ -35,7 +39,15 @@ export class NotionToMarkdownCustom extends NotionToMarkdown {
         ) {
           listStyleContinuationStatus = false;
           // add extra line breaks non list blocks
-          mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
+          if (mdBlocks.type === "table") {
+            // wrap table with shortcode
+            mdString +=
+              '\n{{< table "table-striped table-hover table-responsive" >}}\n';
+            mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
+            mdString += "\n{{< /table >}}\n";
+          } else {
+            mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
+          }
         } else {
           const preLineBreak =
             listStyleContinuationStatus === false && nestingLevel === 0
@@ -51,9 +63,13 @@ export class NotionToMarkdownCustom extends NotionToMarkdown {
 
       // process child blocks
       if (mdBlocks.children && mdBlocks.children.length > 0) {
-        mdString += this.toMarkdownString(mdBlocks.children, nestingLevel + 1);
+        mdString += this.toMarkdownString(
+          mdBlocks.children,
+          pageIdentifier,
+          nestingLevel + 1
+        ).parent;
       }
     });
-    return mdString;
+    return { parent: mdString };
   }
 }

@@ -8,6 +8,8 @@ Use "[Notion](https://www.notion.so/product)" as a Headless CMS to generate a co
 
 This software is dedicated to generating Markdown content for Hugo. After generating the content, follow the Hugo specifications.
 
+`npm install ; npm link ; notion-hugo --force`
+
 ## Features
 
 > NOTE: the Url/slug parameter has been removed. This is for our teams personal [website](https://agmui.github.io/rhit_docs.github.io/docs/).
