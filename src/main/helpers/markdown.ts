@@ -5,34 +5,37 @@ import { getImageFullName, isAwsImageUrlString } from "./notionImage";
 // If the input value is an S3 URL, find and replace the real file from the key.
 // If the image tag does not match or there is no image cache, do nothing and return the input value.
 const replaceS3ImageUrl = async (text: string): Promise<string> => {
-  const markdownOriginalLine = text;
+  const originalLine = text;
 
+  // Pattern to match markdown image tags with S3 URLs
   // expected for: ![](https://s3...)
   //             : ![any title](https://s3...)
   const markdownImageTagUrlPattern = new RegExp(
-    /!\[.*\]\((https:\/\/s3[^)].+?)\)/
+    /!\[.*\]\((https:\/\/(?:s3|prod-files-secure\.s3)\.[^)].+?)\)/
   );
-  const m = text.match(markdownImageTagUrlPattern);
+  const match = text.match(markdownImageTagUrlPattern);
 
-  if (m && m[1]) {
-    const s3Url = m[1];
+  if (match && match[1]) {
+    const s3Url = match[1];
 
+    // Extract the image ID from the S3 URL
     const imageId = getImageFullName(s3Url);
     const fileCache = await findByImageId(imageId);
 
-    if (!fileCache) return markdownOriginalLine;
+    // If no cache is found, return the original line
+    if (!fileCache) return originalLine;
 
+    // Get the public file path from the cache
     const publicFilepath = publicPath(fileCache);
 
-    const urlPatternS3Image = new RegExp(/https:\/\/s3[^)]+/);
-    const markdownNewLine = markdownOriginalLine.replace(
-      urlPatternS3Image,
-      publicFilepath
-    );
+    // Replace the S3 URL with the public file path
+    const newLine = originalLine.replace(s3Url, publicFilepath);
 
-    return markdownNewLine;
+    return newLine;
   }
-  return markdownOriginalLine;
+
+  // Return the original line if no match is found
+  return originalLine;
 };
 
 export const convertS3ImageUrl = async (markdown: string): Promise<string> => {

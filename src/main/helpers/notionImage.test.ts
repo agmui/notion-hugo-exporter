@@ -8,10 +8,17 @@ import {
 
 const s3DummyUrl =
   "https://s3.us-west-2.amazonaws.com/secure.notion-static.com/abcdefgh-1234-5678-abcd-123456789012/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=CREDENTIALCREDENTIALCREDENTIAL0%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220101T000000Z&X-Amz-Expires=3600&X-Amz-Signature=signaturedummyasignaturedummyasignaturedummyasignaturedummyadef3&X-Amz-SignedHeaders=host&x-id=GetObject";
+const s3urlPatternProdFiles =
+  "https://prod-files-secure.s3.us-west-2.amazonaws.com/76a0cc38-9fd7-4070-92db-478b36d526b2/d899991c-2faf-4f57-b7c0-4c76f3156c25/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2";
 
 describe("isAwsImageUrl", () => {
   test("Matchs the AWS url", () => {
     const result = isAwsImageUrl(s3DummyUrl);
+    expect(result).toBe(true);
+  });
+
+  test("Matchs the AWS url", () => {
+    const result = isAwsImageUrl(s3urlPatternProdFiles);
     expect(result).toBe(true);
   });
 
@@ -25,6 +32,11 @@ describe("isAwsImageUrl", () => {
 describe("isAwsImageUrlString", () => {
   test("Matchs the AWS url", () => {
     const result = isAwsImageUrlString(s3DummyUrl);
+    expect(result).toBe(true);
+  });
+
+  test("Matchs the AWS url", () => {
+    const result = isAwsImageUrlString(s3urlPatternProdFiles);
     expect(result).toBe(true);
   });
 
@@ -58,6 +70,13 @@ describe("getImageFullName", () => {
     const result = getImageFullName(s3DummyUrl);
     expect(result).toEqual(
       "secure.notion-static.com/abcdefgh-1234-5678-abcd-123456789012/Untitled.png"
+    );
+  });
+
+  test("Matchs full filename", () => {
+    const result = getImageFullName(s3urlPatternProdFiles);
+    expect(result).toEqual(
+      "76a0cc38-9fd7-4070-92db-478b36d526b2/d899991c-2faf-4f57-b7c0-4c76f3156c25/Untitled.png"
     );
   });
 

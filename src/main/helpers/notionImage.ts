@@ -1,22 +1,24 @@
 import { error } from "../logger";
 
-export const isAwsImageUrl = (url: string): boolean => {
-  const parser = new URL(url);
+// Common function to check if the URL matches both 'amazonaws.com' and 's3'
+const isAwsImageUrlCommon = (url: string): boolean => {
+  // Regular expression to match URLs containing 'amazonaws.com'
   const regHost = new RegExp(/amazonaws\.com/, "i");
-  const regPath = new RegExp(/notion-static\.com/, "i");
-  if (parser.host.match(regHost) && parser.pathname.match(regPath)) {
-    return true;
-  }
-  return false;
+  // Regular expression to match URLs containing 's3'
+  const regS3 = new RegExp(/s3\./, "i");
+
+  // Check if the URL matches both 'amazonaws.com' and 's3'
+  return regHost.test(url) && regS3.test(url);
 };
 
-export const isAwsImageUrlString = (string: string): boolean => {
-  const regHost = new RegExp(/amazonaws\.com/, "i");
-  const regPath = new RegExp(/notion-static\.com/, "i");
-  if (string.match(regHost) && string.match(regPath)) {
-    return true;
-  }
-  return false;
+// TODO: The processing should be able to be unified
+export const isAwsImageUrl = (url: string): boolean => {
+  const parser = new URL(url);
+  return isAwsImageUrlCommon(parser.host);
+};
+
+export const isAwsImageUrlString = (url: string): boolean => {
+  return isAwsImageUrlCommon(url);
 };
 
 export const getImageFilename = (url: string): string => {
@@ -50,14 +52,24 @@ export const getImageFullName = (url: string): string => {
 
   const fullname = m[1];
 
-  const imagePattern = new RegExp(
+  const notionPattern = new RegExp(
     /^.+notion-static.+\.(?:jpe?g|gif|png|webp|avif)/,
     "i"
   );
 
-  if (fullname.match(imagePattern)) {
+  const prodFilesPattern = new RegExp(
+    /^.+prod-files-secure\.s3\.us-west-2\.amazonaws\.com\/(.+\.(?:jpe?g|gif|png|webp|avif))/,
+    "i"
+  );
+
+  if (fullname.match(notionPattern)) {
     return fullname;
-  } else {
-    return "";
+  } else if (url.match(prodFilesPattern)) {
+    const match = url.match(prodFilesPattern);
+    if (match && match[1]) {
+      return match[1];
+    }
   }
+
+  return "";
 };
