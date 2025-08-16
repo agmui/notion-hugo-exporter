@@ -39,15 +39,7 @@ export class NotionToMarkdownCustom extends NotionToMarkdown {
         ) {
           listStyleContinuationStatus = false;
           // add extra line breaks non list blocks
-          if (mdBlocks.type === "table") {
-            // wrap table with shortcode
-            mdString +=
-              '\n{{< table "table-striped table-hover table-responsive" >}}\n';
-            mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
-            mdString += "\n{{< /table >}}\n";
-          } else {
-            mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
-          }
+          mdString += `\n${md.addTabSpace(mdBlocks.parent, nestingLevel)}\n`;
         } else {
           const preLineBreak =
             listStyleContinuationStatus === false && nestingLevel === 0

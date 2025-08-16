@@ -185,7 +185,8 @@ const fetchBodyFromNotion = async (
   }
   const mdblocks: MdBlock[] = await n2m.blocksToMarkdown(blocks);
 
-  const mdString: string = n2m.toMarkdownString(mdblocks).parent;
+  const mdObj = n2m.toMarkdownString(mdblocks);
+  const mdString: string = mdObj.parent === undefined ? "" : mdObj.parent;
 
   const markdownText = await convertS3ImageUrl(mdString);
   if (config.s3ImageUrlWarningEnabled && includeAwsImageUrl(markdownText)) {
